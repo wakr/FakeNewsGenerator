@@ -2,6 +2,10 @@ from subprocess import check_output, DEVNULL
 
 import re
 
+"""
+https://github.com/siavash9000/im2txt_demo for the CNN
+"""
+
 
 def parse(output: str) -> str:
     splitted = output.split("\n")
