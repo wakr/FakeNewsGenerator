@@ -8,7 +8,8 @@ words = []
 for word in text.split(" "):
     blob = TextBlob(word)
     polarity = blob.sentiment.polarity
-    if polarity < 0:
+    if polarity < -0.16:
+        #print(word + " " + str(polarity))
         word = word.replace(",", "")
         word = word.replace("\"", "")
         word = word.replace(".", " ")
