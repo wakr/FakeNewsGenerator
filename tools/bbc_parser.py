@@ -1,7 +1,7 @@
 import glob
 import os
 
-result = open("whole_bbc_data.txt", "w+")
+result = open("../data/whole_bbc_data.txt", "w+")
 
 for filename in glob.iglob('**/*.txt', recursive=True):
      print(filename)

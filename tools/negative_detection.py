@@ -1,8 +1,8 @@
 from textblob import TextBlob
 
-text = open("../whole_bbc_data.txt").read()
+text = open("../data/whole_bbc_data.txt").read()
 text = text.replace(".", " ")
-output = open("negative_words.txt", "w+")
+output = open("../data/negative_words.txt", "w+")
 words = []
 
 for word in text.split(" "):
