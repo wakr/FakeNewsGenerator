@@ -3,8 +3,7 @@ from textblob import Blobber
 from textblob.sentiments import NaiveBayesAnalyzer
 
 class Evaluator:
-    def __init__(self, naive_bayes =True, evaluate_novelty = True, evaluate_value = True):
-        self.naive_bayes = naive_bayes
+    def __init__(self, evaluate_novelty = True, evaluate_value = True):
         self.evaluate_novelty = evaluate_novelty
         self.evaluate_value = evaluate_value
         self.nb_blobber = Blobber(analyzer=NaiveBayesAnalyzer())
