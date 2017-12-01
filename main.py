@@ -14,13 +14,9 @@ def grab_tweet():
 
 def generate_text(tweet):
     tokens, phrase_targets, nouns, verbs, adverbs, adjectives = Preprocessor(tweet).process()
-    print(tokens)
-    print("pt", phrase_targets)
-    print("nouns", nouns)
-    print("adj", adjectives)
-    print("adverb", adverbs)
-    print("verbs", verbs)
-    return None
+    if adjectives: # try antonymes
+        pass
+    return " ".join(tokens)
 
 
 def evaluate_text(output, tweet):
