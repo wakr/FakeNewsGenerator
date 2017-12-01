@@ -15,6 +15,6 @@ class Preprocessor:
         targets = blob.noun_phrases
         proper_nouns = get_part(tags, "NN")
         verbs = get_part(tags, "VB")  # verbs always start with VB
-        particles = get_part(tags, "RB")  # adverbs are closely related to adjectives
+        adverbs = get_part(tags, "RB")  # adverbs are closely related to adjectives
         adjectives = get_part(tags, "JJ")  # true adjectives
-        return list(blob.tokens.lower()), list(targets), proper_nouns, verbs, particles, adjectives
+        return list(blob.tokens.lower()), list(targets), proper_nouns, verbs, adverbs, adjectives
