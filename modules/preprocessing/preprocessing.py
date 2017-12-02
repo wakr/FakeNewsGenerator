@@ -1,9 +1,10 @@
 from textblob import TextBlob
 
+import re
 
 class Preprocessor:
     def __init__(self, tweet):
-        self.tweet = tweet
+        self.tweet = re.sub(r'http\:\/\/cnn.it\S+', '', tweet)
 
     def process(self):
         """
