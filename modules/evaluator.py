@@ -8,10 +8,10 @@ class Evaluator:
         self.evaluate_novelty = evaluate_novelty
         self.evaluate_value = evaluate_value
         self.nb_blobber = Blobber(analyzer=NaiveBayesAnalyzer())
-        self.model = Word2Vec.load("Model")
+        self.model = Word2Vec.load("../data/Model")
 
 
-    def evaluate_novelty(self, text):
+    def novelty_evaluation(self, text):
         score = self.model.score([text])
         return score
 
