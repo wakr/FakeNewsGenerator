@@ -25,6 +25,7 @@ def main():
     tweet = grab_tweet()
     output = generate_text(tweet)
     result = evaluate_text(output, tweet)
+    print(output)
 
 
 if __name__ == '__main__':
