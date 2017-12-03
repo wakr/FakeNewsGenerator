@@ -1,5 +1,5 @@
 from textblob import TextBlob
-
+import nltk
 import re
 
 class Preprocessor:
@@ -14,8 +14,9 @@ class Preprocessor:
         blob = TextBlob(self.tweet)
         tags = blob.tags
         targets = blob.noun_phrases
+        tokens = re.findall(r'[^\W\d]+', blob.raw.lower())
         proper_nouns = get_part(tags, "NN")
         verbs = get_part(tags, "VB")  # verbs always start with VB
         adverbs = get_part(tags, "RB")  # adverbs are closely related to adjectives
         adjectives = get_part(tags, "JJ")  # true adjectives
-        return list(blob.tokens.lower()), list(targets), proper_nouns, verbs, adverbs, adjectives
+        return tokens, list(targets), proper_nouns, verbs, adverbs, adjectives
