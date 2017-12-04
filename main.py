@@ -13,9 +13,11 @@ def grab_tweet():
 
 def generate_text(tweet):
     pos_targets = Preprocessor(tweet).process()
-    generation = Generator(*pos_targets).generate()
-    return " ".join(generation)
-
+    generation = Generator(pos_targets).generate()
+    res = ""
+    for sent_cands in generation:
+        res += "\n".join(sent_cands)
+    return res
 
 def evaluate_text(output, tweet):
     pass
