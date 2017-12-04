@@ -52,7 +52,7 @@ class Generator:
                 candidates[w].append((l.name(), val))
         return candidates
 
-    def negatize_subs(self):
+    def negatize_nouns(self):
         candidates = {}
         flatten = lambda l: [item for sublist in l for item in sublist]
         for w in self.nouns:
@@ -90,4 +90,7 @@ class Generator:
         adj_candidates = self.negatize_adjectives()
         adj_candidates = self.get_n_highest(adj_candidates)
         self.replace_candidates_to_original(adj_candidates)
+        noun_candidates = self.negatize_nouns()
+        noun_candidates = self.get_n_highest(noun_candidates)
+        self.replace_candidates_to_original(noun_candidates)
         return self.tokens
