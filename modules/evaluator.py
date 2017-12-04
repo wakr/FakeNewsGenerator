@@ -27,13 +27,14 @@ class Evaluator:
         return score
 
     def value_evaluation(self, sentence):
+        sum = 0
         if sentence in self.negative_words:
-            return 2.0
+            sum += 2
         blob = TextBlob(sentence)
         blob_naive_bayes = self.nb_blobber(sentence)
         polarity_tb = 1-((blob.sentiment.polarity + 1) / 2)
         polarity_nb = blob_naive_bayes.sentiment.p_neg
-        return polarity_nb + polarity_tb
+        return sum + polarity_nb + polarity_tb
 
     def get_final_evaluation(new_tweet):
         """
