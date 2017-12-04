@@ -26,10 +26,11 @@ class Evaluator:
         score = self.model.score([text])
         return score
 
+    # Value evaliation is weighted sum which is not between 0, 1
     def value_evaluation(self, sentence):
         sum = 0
         if sentence in self.negative_words:
-            sum += 2
+            sum += 0.5
         blob = TextBlob(sentence)
         blob_naive_bayes = self.nb_blobber(sentence)
         polarity_tb = 1-((blob.sentiment.polarity + 1) / 2)
