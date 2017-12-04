@@ -32,6 +32,38 @@ class Generator:
                 candidates[w].append((l.name(), val))
         return candidates
 
+    def negatize_subs(self):
+        candidates = {}
+        flatten = lambda l: [item for sublist in l for item in sublist]
+        for w in self.nouns:
+            candidates[w] = [(w, self.evaluator.value_evaluation(w))]
+            synsets = Word(w).get_synsets(pos=NOUN)
+            upper_meanings = []
+            for ss in synsets:
+                hype = flatten([h.lemmas() for h in ss.hypernyms()])
+                hypo = flatten([h.lemmas() for h in ss.hyponyms()])
+                upper_meanings += hype
+                upper_meanings += hypo
+            for l in upper_meanings:
+                val = self.evaluator.value_evaluation(l.name())
+                candidates[w].append((l.name(), val))
+        return candidates
+
+    def negatize_adjectives(self):
+        candidates = {}
+        for w in self.adjectives:
+            candidates[w] = [(w, self.evaluator.value_evaluation(w))]
+            synsets = Word(w).get_synsets(pos=ADJ)
+            print(synsets)
+            for syn in synsets:
+                antonyms = syn.lemmas()[0].antonyms()
+                for a in antonyms:
+                    val = self.evaluator.value_evaluation(a.name())
+                    candidates[w].append((a.name(), val))
+
+        return candidates
+
     def generate(self):
-        verb_candidates = self.negatize_verbs()
+        verb_candidates = self.negatize_adjectives()
+        print(verb_candidates)
         return self.tokens
