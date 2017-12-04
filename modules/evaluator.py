@@ -5,6 +5,7 @@ from gensim.models import Word2Vec
 
 import requests
 import json
+import os
 
 
 class Evaluator:
@@ -12,13 +13,14 @@ class Evaluator:
         self.evaluate_novelty = evaluate_novelty
         self.evaluate_value = evaluate_value
         self.nb_blobber = Blobber(analyzer=NaiveBayesAnalyzer())
-        self.model = Word2Vec.load("../data/Model")
+        #self.model = Word2Vec.load("../data/Model")
         self.read_negative_words()
 
     def read_negative_words(self):
-        text = open("../data/negative_word_list.txt").read()
+        dir = os.path.dirname(__file__)
+        filename = os.path.join(dir, '../data/negative_word_list.txt')
+        text = open(filename).read()
         self.negative_words = set(text.split("\n"))
-        print(self.negative_words)
 
     def novelty_evaluation(self, text):
         score = self.model.score([text])
