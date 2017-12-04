@@ -15,6 +15,26 @@ class Generator:
         self.adjectives = adjectives
         self.evaluator = Evaluator()
 
+    def replace_candidates_to_original(self, candidates):
+        """
+        Mutates the original tokens
+        :param candidates: POS-candidates
+        """
+        for c in candidates.keys():
+            for (i, t) in enumerate(self.tokens):
+                if c == t:
+                    self.tokens[i] = random.choice(candidates[c])[0]  # (word, score) pairs
+
+    def get_n_highest(self, candidate_scores, n=1):
+        res = {}
+        for k in candidate_scores.keys():
+            cands = candidate_scores[k]
+            top_n = sorted(cands, key=lambda x: x[1], reverse=True)[:n]
+            res[k] = top_n
+        return res
+
+
+
     def negatize_verbs(self):
         candidates = {}
         flatten = lambda l: [item for sublist in l for item in sublist]
@@ -64,6 +84,10 @@ class Generator:
         return candidates
 
     def generate(self):
-        verb_candidates = self.negatize_adjectives()
-        print(verb_candidates)
+        verb_candidates = self.negatize_verbs()
+        verb_candidates = self.get_n_highest(verb_candidates)
+        self.replace_candidates_to_original(verb_candidates)
+        adj_candidates = self.negatize_adjectives()
+        adj_candidates = self.get_n_highest(adj_candidates)
+        self.replace_candidates_to_original(adj_candidates)
         return self.tokens
