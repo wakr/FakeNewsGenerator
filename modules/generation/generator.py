@@ -65,7 +65,7 @@ class Generator:
         flatten = lambda l: [item for sublist in l for item in sublist]
         for w in sent_target["verbs"]:
             candidates[w] = [(w, self.evaluator.value_evaluation(w))]
-            past_tense = self.generator_utils.is_past_tense(w)
+            properties = self.generator_utils.get_properties(w)
             if not self.generator_utils.replacement_allowed(w):
                 continue
             synsets = Word(w).get_synsets(pos=VERB)
@@ -77,7 +77,7 @@ class Generator:
                 upper_meanings += hypo
             for l in upper_meanings:
                 val = self.evaluator.value_evaluation(l.name())
-                candidates[w].append((self.generator_utils.right_form(l.name(), past_tense), val))
+                candidates[w].append((self.generator_utils.right_form(l.name(), properties), val))
         return candidates
 
     def negatize_nouns(self, sent_target):
