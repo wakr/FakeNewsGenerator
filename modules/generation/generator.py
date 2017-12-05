@@ -2,6 +2,7 @@ from modules.evaluator import Evaluator
 from modules.generation.transformer import explore_space
 from textblob import Word
 from textblob.wordnet import ADJ, VERB, NOUN
+from modules.generation.generator_utils import GeneratorUtils
 
 import random
 
@@ -9,6 +10,7 @@ class Generator:
     def __init__(self, pos_sentences):
         self.pos_sentences = pos_sentences
         self.evaluator = Evaluator()
+        self.generator_utils = GeneratorUtils()
 
     def replace_candidates_to_original(self, target, verbs_c, adjectives_c, nouns_c, max_recursion, current=0):
         generations = []
@@ -51,11 +53,20 @@ class Generator:
             res[k] = top_n
         return res
 
+    def replacement_allowed(self, word):
+        not_list = ['was', 'were', 'is', 'are', 'have', 'has', 'had']
+        for not_word in not_list:
+            if word == not_word:
+                return False
+        return True
+
     def negatize_verbs(self, sent_target):
         candidates = {}
         flatten = lambda l: [item for sublist in l for item in sublist]
         for w in sent_target["verbs"]:
             candidates[w] = [(w, self.evaluator.value_evaluation(w))]
+            if not self.generator_utils.replacement_allowed(w):
+                continue
             synsets = Word(w).get_synsets(pos=VERB)
             upper_meanings = []
             for ss in synsets:
