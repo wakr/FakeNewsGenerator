@@ -56,7 +56,10 @@ def collect_tweets(username, pagecount=5):
     # and collect their text to list.
     tweets_lst = []
     for tweet in tweet_texts:
-        tweets_lst.append(tweet.text)
+        txt = tweet.text
+        # Ignore multiline tweets
+        if txt.find('\n') < 0:
+            tweets_lst.append(tweet.text)
 
     browser.close()
 
@@ -77,4 +80,7 @@ if __name__ == '__main__':
         tweets = collect_tweets(args.username, args.pagecount)
     else:
         tweets = collect_tweets(args.username)
-    print(tweets)
+
+    # Output tweets from the list
+    for tweet in tweets:
+        print(tweet)

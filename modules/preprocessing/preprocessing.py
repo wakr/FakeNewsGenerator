@@ -1,7 +1,5 @@
-from textblob import TextBlob
-import nltk
 import re
-
+from textblob import TextBlob
 
 class Preprocessor:
     def __init__(self, tweet):
@@ -14,16 +12,16 @@ class Preprocessor:
         res = []
         for s in sentences:
             tags = s.tags
-            get_part = lambda a, target: [w.lower() for (w, p) in a if target in p]
+            get_part = lambda a, target, execptarget: [w.lower() for (w, p) in a if target in p and not execptarget in p]
             targets = s.noun_phrases
             tokens = re.findall(r'[^\W\d]+', s.raw.lower())
-            proper_nouns = get_part(tags, "NN")
-            verbs = get_part(tags, "VB")  # verbs always start with VB
-            adverbs = get_part(tags, "RB")  # adverbs are closely related to adjectives
-            adjectives = get_part(tags, "JJ")  # true adjectives
+            nouns = get_part(tags, "NN", "NNP") # Exclude proper nouns
+            verbs = get_part(tags, "VB", "*")  # verbs always start with VB
+            adverbs = get_part(tags, "RB", "*")  # adverbs are closely related to adjectives
+            adjectives = get_part(tags, "JJ", "*")  # true adjectives
             feature_map = {"tokens": tokens,
                            "phrase_targets": list(targets),
-                           "nouns": proper_nouns,
+                           "nouns": nouns,
                            "verbs": verbs,
                            "adverbs": adverbs,
                            "adjectives": adjectives}

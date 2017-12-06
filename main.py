@@ -1,15 +1,32 @@
+import os
 import random
+import re
 
 from modules.preprocessing.preprocessing import Preprocessor
-from modules.generation.generator import  Generator
-
+from modules.generation.generator import Generator
+from modules.evaluator import Evaluator
+from modules.tweet_grabber import collect_tweets
 
 def grab_tweet():
-    path = "data/stored_tweets.txt"
-    with open(path, 'r') as infile:
-        tweets = infile.readlines()
-    return random.choice(tweets)
+    tweet_file = "data/stored_tweets.txt"
 
+    # Check if there is file with tweets available
+    if not os.path.isfile(tweet_file):
+        # If not collect some
+        tweets = collect_tweets('CNN', 10)
+        with open(tweet_file, 'w') as outfile:
+            outfile.write('\n'.join(tweets))
+    else:
+        # Else read existing tweets
+        with open(tweet_file, 'r') as infile:
+            tweets = infile.readlines()
+
+    # Select one tweet for processing
+    selected_tweet = random.choice(tweets)
+    # Remove new line, if present
+    selected_tweet = selected_tweet.replace('\n','')
+    # Remove possible hyperlink
+    return re.sub(r'http\:\/\/cnn.it\S+', '', selected_tweet)
 
 def generate_text(tweet):
     pos_targets = Preprocessor(tweet).process()
@@ -17,7 +34,36 @@ def generate_text(tweet):
     res = ""
     for sent_cands in generation:
         res += "\n".join(sent_cands)
-    return res
+    # Remove duplicates
+    res = '\n'.join(list(set(res.split('\n'))))
+    # Perform internal evaluation although it does not presently affect anything
+    # save that it takes a fixed size of samples from generated
+    sampled = internal_evaluation(res, tweet)
+
+    return sampled
+
+def internal_evaluation(generated, original_tweet):
+    lcleval = Evaluator()
+    # Evaluate original tweet
+    org_eval = lcleval.value_evaluation(original_tweet)
+
+    # Split generated tweets to a list
+    tweets = generated.split('\n')
+
+    # Collect list of generated tweets that score higher than original
+    rtweets = []
+    for atweet in tweets:
+        res = lcleval.value_evaluation(atweet)
+        if res > org_eval:
+            rtweets.append((atweet, res))
+
+    # Sort collected tweets in order based on their score
+    rtweets = sorted(rtweets, key = lambda x: x[1])
+    # Select sample of them
+    sampled = random.sample(rtweets, 10)
+    sampled = [sample[0] for sample in sampled]
+
+    return sampled
 
 def evaluate_text(output, tweet):
     pass
@@ -26,8 +72,10 @@ def evaluate_text(output, tweet):
 def main():
     tweet = grab_tweet()
     output = generate_text(tweet)
-    result = evaluate_text(output, tweet)
-    print(output)
+    # Display generated texts
+    for item in output:
+        print(item)
+    # result = evaluate_text(output, tweet)
 
 
 if __name__ == '__main__':
