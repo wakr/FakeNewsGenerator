@@ -7,6 +7,8 @@ from modules.generation.generator import Generator
 from modules.evaluator import Evaluator
 from modules.tweet_grabber import collect_tweets
 
+from itertools import product
+
 def grab_tweet():
     tweet_file = "data/stored_tweets.txt"
 
@@ -31,11 +33,10 @@ def grab_tweet():
 def generate_text(tweet):
     pos_targets = Preprocessor(tweet).process()
     generation = Generator(pos_targets).generate()
+    generation_combinations = list(product(*generation))
     res = ""
-    for sent_cands in generation:
-        res += "\n".join(sent_cands)
-    # Remove duplicates
-    res = '\n'.join(list(set(res.split('\n'))))
+    for sent_cands in generation_combinations:
+        res += ". ".join(sent_cands) + "\n"
     # Perform internal evaluation although it does not presently affect anything
     # save that it takes a fixed size of samples from generated
     sampled = internal_evaluation(res, tweet)
@@ -48,7 +49,7 @@ def internal_evaluation(generated, original_tweet):
     org_eval = lcleval.value_evaluation(original_tweet)
 
     # Split generated tweets to a list
-    tweets = generated.split('\n')
+    tweets = generated.split('\n')[:-1]  # remove the last \n
 
     # Collect list of generated tweets that score higher than original
     rtweets = []
@@ -58,9 +59,9 @@ def internal_evaluation(generated, original_tweet):
             rtweets.append((atweet, res))
 
     # Sort collected tweets in order based on their score
-    rtweets = sorted(rtweets, key = lambda x: x[1])
+    rtweets = sorted(rtweets, key=lambda x: x[1], reverse=True)
     # Select sample of them
-    sampled = random.sample(rtweets, 10)
+    sampled = rtweets[:10] # take max top-10
     sampled = [sample[0] for sample in sampled]
 
     return sampled

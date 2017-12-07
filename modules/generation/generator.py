@@ -128,11 +128,12 @@ class Generator:
         max_recursion = 3
         res = []
         for (i, s) in enumerate(self.pos_sentences):
-            verb_candidates = self.get_n_highest(self.negatize_verbs(s), n=1)
-            adj_candidates = self.get_n_highest(self.negatize_adjectives(s), n=1)
-            noun_candidates = self.get_n_highest(self.negatize_nouns(s), n=1)
+            verb_candidates = self.get_n_highest(self.negatize_verbs(s), n=2)
+            adj_candidates = self.get_n_highest(self.negatize_adjectives(s), n=2)
+            noun_candidates = self.get_n_highest(self.negatize_nouns(s), n=3)
             res.append(self.replace_candidates_to_original(s, verb_candidates, adj_candidates, noun_candidates, max_recursion))
 
         tweets_per_sent = [self._flatten(res[i], []) for (i, s) in enumerate(self.pos_sentences)]
+        set_tweets_per_sent = [list(set(sent)) for sent in tweets_per_sent]  # throw away duplicates
 
-        return tweets_per_sent
+        return set_tweets_per_sent
