@@ -60,7 +60,7 @@ class Generator:
                 return False
         return True
 
-    def negatize_verbs(self, sent_target):
+    def negatize_verbs(self, sent_target, max_synset_len=3):
         candidates = {}
         flatten = lambda l: [item for sublist in l for item in sublist]
         for w in sent_target["verbs"]:
@@ -68,45 +68,50 @@ class Generator:
             properties = self.generator_utils.get_properties(w)
             if not self.generator_utils.replacement_allowed(w):
                 continue
-            synsets = Word(w).get_synsets(pos=VERB)
+            synsets = Word(w).get_synsets(pos=VERB)[:max_synset_len]
             upper_meanings = []
             for ss in synsets:
                 hype = flatten([h.lemmas() for h in ss.hypernyms()])
                 hypo = flatten([h.lemmas() for h in ss.hyponyms()])
                 upper_meanings += hype
                 upper_meanings += hypo
+                upper_meanings += flatten([u.antonyms() for u in upper_meanings])  # find all candidate antonyms
+                upper_meanings = list(set(upper_meanings))
             for l in upper_meanings:
                 val = self.evaluator.value_evaluation(l.name())
                 candidates[w].append((self.generator_utils.right_form(l.name(), properties), val))
         return candidates
 
-    def negatize_nouns(self, sent_target):
+    def negatize_nouns(self, sent_target, max_synset_len=3):
         candidates = {}
         flatten = lambda l: [item for sublist in l for item in sublist]
         for w in sent_target["nouns"]:
             candidates[w] = [(w, self.evaluator.value_evaluation(w))]
-            synsets = Word(w).get_synsets(pos=NOUN)
+            synsets = Word(w).get_synsets(pos=NOUN)[:max_synset_len]
             upper_meanings = []
             for ss in synsets:
                 hype = flatten([h.lemmas() for h in ss.hypernyms()])
                 hypo = flatten([h.lemmas() for h in ss.hyponyms()])
                 upper_meanings += hype
                 upper_meanings += hypo
+                upper_meanings += flatten([u.antonyms() for u in upper_meanings])
+                upper_meanings = list(set(upper_meanings))
             for l in upper_meanings:
                 val = self.evaluator.value_evaluation(l.name())
                 candidates[w].append((l.name(), val))
         return candidates
 
-    def negatize_adjectives(self, sent_target):
+    def negatize_adjectives(self, sent_target, max_synset_len=3):
         candidates = {}
         for w in sent_target["adjectives"]:
             candidates[w] = [(w, self.evaluator.value_evaluation(w))]
-            synsets = Word(w).get_synsets(pos=ADJ)
+            synsets = Word(w).get_synsets(pos=ADJ)[:max_synset_len]
             for syn in synsets:
-                antonyms = syn.lemmas()[0].antonyms()
-                for a in antonyms:
-                    val = self.evaluator.value_evaluation(a.name())
-                    candidates[w].append((a.name(), val))
+                for lemma in syn.lemmas():
+                    antonyms = lemma.antonyms()
+                    for a in antonyms:
+                        val = self.evaluator.value_evaluation(a.name())
+                        candidates[w].append((a.name(), val))
 
         return candidates
 
@@ -126,11 +131,12 @@ class Generator:
         :return: candidates per sentence [[C1], [C2]...,[CN]]
         """
         max_recursion = 3
+        max_synset_len = 10
         res = []
         for (i, s) in enumerate(self.pos_sentences):
-            verb_candidates = self.get_n_highest(self.negatize_verbs(s), n=2)
-            adj_candidates = self.get_n_highest(self.negatize_adjectives(s), n=2)
-            noun_candidates = self.get_n_highest(self.negatize_nouns(s), n=3)
+            verb_candidates = self.get_n_highest(self.negatize_verbs(s, max_synset_len), n=4)
+            adj_candidates = self.get_n_highest(self.negatize_adjectives(s, max_synset_len), n=2)
+            noun_candidates = self.get_n_highest(self.negatize_nouns(s, max_synset_len), n=3)
             res.append(self.replace_candidates_to_original(s, verb_candidates, adj_candidates, noun_candidates, max_recursion))
 
         tweets_per_sent = [self._flatten(res[i], []) for (i, s) in enumerate(self.pos_sentences)]
