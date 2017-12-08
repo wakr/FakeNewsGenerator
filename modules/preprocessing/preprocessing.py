@@ -9,6 +9,7 @@ class Preprocessor:
         """
         Transform a tweet into a representation of grammar tokens of 6-tuple
         """
+        print("\t-Processing tweet into sentence tuples")
         res = []
         for s in sentences:
             tags = s.tags
@@ -26,6 +27,7 @@ class Preprocessor:
                            "adverbs": adverbs,
                            "adjectives": adjectives}
             res.append(feature_map)
+        print("\t-Processing done")
         return res
 
     def process(self):

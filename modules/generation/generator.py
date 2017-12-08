@@ -134,6 +134,7 @@ class Generator:
         max_synset_len = 10
         res = []
         for (i, s) in enumerate(self.pos_sentences):
+            print("\t-Processing candidates for {}th sentence".format(i))
             verb_candidates = self.get_n_highest(self.negatize_verbs(s, max_synset_len), n=4)
             adj_candidates = self.get_n_highest(self.negatize_adjectives(s, max_synset_len), n=2)
             noun_candidates = self.get_n_highest(self.negatize_nouns(s, max_synset_len), n=3)
@@ -141,5 +142,5 @@ class Generator:
 
         tweets_per_sent = [self._flatten(res[i], []) for (i, s) in enumerate(self.pos_sentences)]
         set_tweets_per_sent = [list(set(sent)) for sent in tweets_per_sent]  # throw away duplicates
-
+        print("\t-Generation done. Found {} candidates for {} sentences".format(sum([len(s) for s in set_tweets_per_sent]), len(self.pos_sentences)))
         return set_tweets_per_sent

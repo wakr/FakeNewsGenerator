@@ -1,6 +1,7 @@
 import os
 import random
 import re
+import sys
 
 from modules.preprocessing.preprocessing import Preprocessor
 from modules.generation.generator import Generator
@@ -8,6 +9,7 @@ from modules.evaluator import Evaluator
 from modules.tweet_grabber import collect_tweets
 
 from itertools import product
+
 
 def grab_tweet():
     tweet_file = "data/stored_tweets.txt"
@@ -30,10 +32,13 @@ def grab_tweet():
     # Remove possible hyperlink
     return re.sub(r'http\:\/\/cnn.it\S+', '', selected_tweet)
 
+
 def generate_text(tweet):
     pos_targets = Preprocessor(tweet).process()
     generation = Generator(pos_targets).generate()
+    print("\t-Starting to form combinations...")
     generation_combinations = list(product(*generation))
+    print("\t-Formed {} different combinations".format(len(generation_combinations)))
     res = ""
     for sent_cands in generation_combinations:
         res += ". ".join(sent_cands) + "\n"
@@ -43,7 +48,9 @@ def generate_text(tweet):
 
     return sampled
 
+
 def internal_evaluation(generated, original_tweet):
+    print("\t-Starting internal evaluation")
     lcleval = Evaluator()
     # Evaluate original tweet
     org_eval = lcleval.value_evaluation(original_tweet)
@@ -57,7 +64,7 @@ def internal_evaluation(generated, original_tweet):
         res = lcleval.value_evaluation(atweet)
         if res > org_eval:
             rtweets.append((atweet, res))
-
+    print("\t-Evaluation done")
     # Sort collected tweets in order based on their score
     rtweets = sorted(rtweets, key=lambda x: x[1], reverse=True)
     # Select sample of them
@@ -65,6 +72,7 @@ def internal_evaluation(generated, original_tweet):
     sampled = [sample[0] for sample in sampled]
 
     return sampled
+
 
 def evaluate_text(output, tweet):
     pass

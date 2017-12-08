@@ -30,7 +30,7 @@ class Evaluator:
     def value_evaluation(self, sentence):
         sum = 0
         if sentence in self.negative_words:
-            sum += 0.5
+            sum += 1
         blob = TextBlob(sentence)
         blob_naive_bayes = self.nb_blobber(sentence)
         polarity_tb = 1-((blob.sentiment.polarity + 1) / 2)
