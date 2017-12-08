@@ -68,7 +68,6 @@ def internal_evaluation(generated, original_tweet):
     # Sort collected tweets in order based on their score
     rtweets = sorted(rtweets, key=lambda x: x[1], reverse=True)
     # Select sample of them
-    print(rtweets)
     sampled = rtweets[:10] # take max top-10
     sampled = [sample[0] for sample in sampled]
 
