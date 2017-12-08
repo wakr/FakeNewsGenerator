@@ -16,6 +16,7 @@ class Evaluator:
         self.nb_blobber = Blobber(analyzer=NaiveBayesAnalyzer())
         #self.model = Word2Vec.load("../data/Model")
         self.read_negative_words()
+        self.word_negativities = {}
 
     def read_negative_words(self):
         dir = os.path.dirname(__file__)
@@ -42,7 +43,12 @@ class Evaluator:
         sum = 0
         blob = self.nb_blobber(sentence)
         for word in blob.words:
-            sum += self.value_evaluation(word)
+            if word in self.word_negativities:
+                sum += self.word_negativities[word]
+            else:
+                neg = self.value_evaluation(word)
+                sum += neg
+                self.word_negativities[word] = neg
         return sum
 
 
