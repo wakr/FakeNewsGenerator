@@ -2,6 +2,7 @@ from textblob import TextBlob
 from textblob import Blobber
 from textblob.sentiments import NaiveBayesAnalyzer
 from gensim.models import Word2Vec
+from nltk import tokenize
 
 import requests
 import json
@@ -36,6 +37,15 @@ class Evaluator:
         polarity_tb = 1-((blob.sentiment.polarity + 1) / 2)
         polarity_nb = blob_naive_bayes.sentiment.p_neg
         return sum + polarity_nb + polarity_tb
+
+    def value_evaluation_for_words(self, sentence):
+        sum = 0
+        blob = self.nb_blobber(sentence)
+        for word in blob.words:
+            sum += self.value_evaluation(word)
+        return sum
+
+
 
     def get_final_evaluation(new_tweet):
         """
