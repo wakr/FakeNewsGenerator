@@ -14,7 +14,8 @@ class Evaluator:
         self.evaluate_novelty = evaluate_novelty
         self.evaluate_value = evaluate_value
         self.nb_blobber = Blobber(analyzer=NaiveBayesAnalyzer())
-        #self.model = Word2Vec.load("../data/Model")
+        dir = os.path.dirname(__file__)
+        self.model = Word2Vec.load(os.path.join(dir, "../data/Model"))
         self.read_negative_words()
         self.word_negativities = {}
 
@@ -27,6 +28,11 @@ class Evaluator:
     def novelty_evaluation(self, text):
         score = self.model.score([text])
         return score
+
+    def external_evaluation(self, text):
+        nov = -1*(self.novelty_evaluation(text))
+        val = self.value_evaluation_for_words(text)
+        return nov + val
 
     # Value evaliation is weighted sum which is not between 0, 1
     def value_evaluation(self, sentence):
