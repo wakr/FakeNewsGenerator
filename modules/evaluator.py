@@ -43,6 +43,9 @@ class Evaluator:
         sum = 0
         blob = self.nb_blobber(sentence)
         for word in blob.words:
+            if word.startswith("retard"):
+                sum += -1000
+                continue
             if word in self.word_negativities:
                 sum += self.word_negativities[word]
             else:
