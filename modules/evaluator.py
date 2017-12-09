@@ -30,7 +30,7 @@ class Evaluator:
         return score
 
     def external_evaluation(self, text):
-        nov = -1*(self.novelty_evaluation(text))
+        nov = -1*(self.novelty_evaluation(text))/50
         val = self.value_evaluation_for_words(text)
         return nov + val
 

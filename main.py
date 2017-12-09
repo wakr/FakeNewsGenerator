@@ -79,8 +79,10 @@ def evaluate_text(output, tweet):
     pass
 
 
+
 def main():
     tweet = grab_tweet()
+    print(tweet)
     output = generate_text(tweet)
     # Display generated texts
     #for item in output:
