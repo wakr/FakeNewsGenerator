@@ -65,18 +65,13 @@ def internal_evaluation(generated, original_tweet):
         res = lcleval.value_evaluation_for_words(atweet)
         novelty = lcleval.novelty_evaluation(atweet)
         if res > org_eval:
-            rtweets.append((atweet, res, lcleval.novelty_evaluation(atweet)))
+            rtweets.append((atweet, res, novelty))
     print("\t-Evaluation done")
     # Sort collected tweets in order based on their score
     rtweets = sorted(rtweets, key=lambda x: x[1], reverse=True)
     # Select sample of them
-    sampled = rtweets[:10] # take max top-10
-    #sampled = [sample[0] for sample in sampled]
+    sampled = rtweets[:20] # take max top-10
     return sampled
-
-
-def evaluate_text(output, tweet):
-    pass
 
 
 
@@ -85,12 +80,8 @@ def main():
     print(tweet)
     output = generate_text(tweet)
     # Display generated texts
-    #for item in output:
-     #   print(item)
-    best = output[0][0]
-    print(best)
-    print(Evaluator().external_evaluation(best))
-    # result = evaluate_text(output, tweet)
+    for item in output:
+        print(item)
 
 
 if __name__ == '__main__':
