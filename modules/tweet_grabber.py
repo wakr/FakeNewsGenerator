@@ -63,6 +63,10 @@ def collect_tweets(username, pagecount=5):
 
     browser.close()
 
+    # Drop the first tweet in case of CNN as it appears to be static commercial
+    if username.lower() == 'cnn':
+        tweets_lst = tweets_lst[1:]
+
     return tweets_lst
 
 #
