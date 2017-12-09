@@ -25,7 +25,10 @@ class GeneratorUtils:
         if properties[0]:
             return word + "est"
         if properties[1]:
-            return word+ "er"
+            if word.endswith("e"):
+                return word + "r"
+            else:
+                return word + "er"
         return word
 
 
