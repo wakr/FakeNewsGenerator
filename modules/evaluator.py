@@ -27,11 +27,11 @@ class Evaluator:
 
     def novelty_evaluation(self, text):
         score = self.model.score([text])
-        return score
+        return score[0]
 
     def external_evaluation(self, text):
-        nov = -1*(self.novelty_evaluation(text))/50
-        val = self.value_evaluation_for_words(text)
+        nov = -1*(self.novelty_evaluation(text))/1000
+        val = self.get_final_evaluation(text)['neg']
         return nov + val
 
     # Value evaliation is weighted sum which is not between 0, 1
@@ -62,7 +62,7 @@ class Evaluator:
 
 
 
-    def get_final_evaluation(new_tweet):
+    def get_final_evaluation(self, new_tweet):
         """
         The final evaluation of tweet. Note 25000 limit per month :(
         :param new_tweet: phenotype
