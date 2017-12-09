@@ -45,9 +45,18 @@ def generate_text(tweet):
     # Perform internal evaluation although it does not presently affect anything
     # save that it takes a fixed size of samples from generated
     sampled = internal_evaluation(res, tweet)
+    final_res = external_evaluation(sampled)
+    return final_res
 
-    return sampled
-
+def external_evaluation(top_candidates):
+    use_quota = False  # change to True only when all other blocks of this software is done
+    if not use_quota:
+        return top_candidates
+    print("\t-Starting external evaluation for {} candidate Tweets".format(len(top_candidates)))
+    lcleval = Evaluator()
+    scored_top = [(t, lcleval.external_evaluation(t)) for (t, s) in top_candidates]
+    scored_top = sorted(scored_top, key=lambda x: x[1], reverse=True)
+    return scored_top[0]  # the best
 
 def internal_evaluation(generated, original_tweet):
     print("\t-Starting internal evaluation")
@@ -60,17 +69,17 @@ def internal_evaluation(generated, original_tweet):
 
     # Collect list of generated tweets that score higher than original
     rtweets = []
-    rtweets_novelty = []
     for atweet in tweets:
         res = lcleval.value_evaluation_for_words(atweet)
         novelty = lcleval.novelty_evaluation(atweet)
+        score = (-res) + novelty  # The lower the score, the better
         if res > org_eval:
-            rtweets.append((atweet, res, novelty))
+            rtweets.append((atweet, score))
     print("\t-Evaluation done")
     # Sort collected tweets in order based on their score
     rtweets = sorted(rtweets, key=lambda x: x[1], reverse=True)
     # Select sample of them
-    sampled = rtweets[:20] # take max top-10
+    sampled = rtweets[:10] # take max top-10
     return sampled
 
 
@@ -80,8 +89,8 @@ def main():
     print(tweet)
     output = generate_text(tweet)
     # Display generated texts
-    for item in output:
-        print(item)
+    for t, s in output:
+        print(t)
 
 
 if __name__ == '__main__':
