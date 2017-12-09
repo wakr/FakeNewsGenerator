@@ -15,26 +15,29 @@ class Evaluator:
         self.evaluate_value = evaluate_value
         self.nb_blobber = Blobber(analyzer=NaiveBayesAnalyzer())
         dir = os.path.dirname(__file__)
-        self.model = Word2Vec.load(os.path.join(dir, "../data/Model"))
+        self.model = Word2Vec.load(os.path.join(dir, "../data/Model")) # In our novelty evaluation we are using Word2Vec model trained with reuters news titles
         self.read_negative_words()
         self.word_negativities = {}
 
+    # We are using negative words list in evaluating value of word
     def read_negative_words(self):
         dir = os.path.dirname(__file__)
         filename = os.path.join(dir, '../data/negative_word_list.txt')
         text = open(filename).read()
         self.negative_words = set(text.split("\n"))
 
+    # Novelty evaluation is log propability of text occurring according to our Word2Vec model. Lower score, better novelty.
     def novelty_evaluation(self, text):
         score = self.model.score([text])
         return score[0]
 
+    # External evaluation is used for evaluating the final tweet. It's novelty and negativity value combined, first scaling novelty.
     def external_evaluation(self, text):
         nov = -1*(self.novelty_evaluation(text))/1000
         val = self.get_final_evaluation(text)['neg']
         return nov + val
 
-    # Value evaliation is weighted sum which is not between 0, 1
+    # Value evaluation is weighted sum which is not between 0, 1. It evaluates negativity.
     def value_evaluation(self, sentence):
         sum = 0
         if sentence in self.negative_words:
@@ -45,6 +48,7 @@ class Evaluator:
         polarity_nb = blob_naive_bayes.sentiment.p_neg
         return sum + polarity_nb + polarity_tb
 
+    # This function returns sum of negativities of list of words.
     def value_evaluation_for_words(self, sentence):
         sum = 0
         blob = self.nb_blobber(sentence)
@@ -62,6 +66,7 @@ class Evaluator:
 
 
 
+    # This function evaluates negativity of sentence using WordNet
     def get_final_evaluation(self, new_tweet):
         """
         The final evaluation of tweet. Note 25000 limit per month :(
