@@ -77,7 +77,7 @@ def internal_evaluation(generated, original_tweet):
             rtweets.append((atweet, score))
     print("\t-Evaluation done")
     # Sort collected tweets in order based on their score
-    rtweets = sorted(rtweets, key=lambda x: x[1], reverse=True)
+    rtweets = sorted(rtweets, key=lambda x: x[1], reverse=False)
     # Select sample of them
     sampled = rtweets[:10] # take max top-10
     return sampled
@@ -90,7 +90,7 @@ def main():
     output = generate_text(tweet)
     # Display generated texts
     for t, s in output:
-        print(t)
+        print(t, s)
 
 
 if __name__ == '__main__':
