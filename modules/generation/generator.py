@@ -65,7 +65,7 @@ class Generator:
         flatten = lambda l: [item for sublist in l for item in sublist]
         for w in sent_target["verbs"]:
             candidates[w] = [(w, self.evaluator.value_evaluation(w))]
-            properties = self.generator_utils.get_properties(w)
+            properties = self.generator_utils.get_properties_verb(w)
             if not self.generator_utils.replacement_allowed(w):
                 continue
             synsets = Word(w).get_synsets(pos=VERB)[:max_synset_len]
@@ -79,7 +79,7 @@ class Generator:
                 upper_meanings = list(set(upper_meanings))
             for l in upper_meanings:
                 val = self.evaluator.value_evaluation(l.name())
-                candidates[w].append((self.generator_utils.right_form(l.name(), properties), val))
+                candidates[w].append((self.generator_utils.right_form_verb(l.name(), properties), val))
         return candidates
 
     def negatize_nouns(self, sent_target, max_synset_len=3):
@@ -106,12 +106,13 @@ class Generator:
         for w in sent_target["adjectives"]:
             candidates[w] = [(w, self.evaluator.value_evaluation(w))]
             synsets = Word(w).get_synsets(pos=ADJ)[:max_synset_len]
+            properties = self.generator_utils.get_properties_adjective(w)
             for syn in synsets:
                 for lemma in syn.lemmas():
                     antonyms = lemma.antonyms()
                     for a in antonyms:
                         val = self.evaluator.value_evaluation(a.name())
-                        candidates[w].append((a.name(), val))
+                        candidates[w].append((self.generator_utils.right_form_adjective(a.name(), properties), val))
 
         return candidates
 
