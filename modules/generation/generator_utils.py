@@ -23,7 +23,10 @@ class GeneratorUtils:
 
     def right_form_adjective(self, word, properties):
         if properties[0]:
-            return word + "est"
+            if word.endswith("e"):
+                return word + "st"
+            else:
+                return word + "est"
         if properties[1]:
             if word.endswith("e"):
                 return word + "r"
