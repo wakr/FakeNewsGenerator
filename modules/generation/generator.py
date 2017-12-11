@@ -78,8 +78,8 @@ class Generator:
                 upper_meanings += flatten([u.antonyms() for u in upper_meanings])  # find all candidate antonyms
                 upper_meanings = list(set(upper_meanings))
             for l in upper_meanings:
-                val = self.evaluator.value_evaluation(l.name())
-                candidates[w].append((self.generator_utils.right_form_verb(l.name(), properties), val))
+                val = self.evaluator.value_evaluation(l.name().lower())
+                candidates[w].append((self.generator_utils.right_form_verb(l.name().lower(), properties), val))
         return candidates
 
     def negatize_nouns(self, sent_target, max_synset_len=3):
@@ -97,8 +97,8 @@ class Generator:
                 upper_meanings += flatten([u.antonyms() for u in upper_meanings])
                 upper_meanings = list(set(upper_meanings))
             for l in upper_meanings:
-                val = self.evaluator.value_evaluation(l.name())
-                candidates[w].append((l.name(), val))
+                val = self.evaluator.value_evaluation(l.name().lower())
+                candidates[w].append((l.name().lower(), val))
         return candidates
 
     def negatize_adjectives(self, sent_target, max_synset_len=3):
@@ -111,8 +111,8 @@ class Generator:
                 for lemma in syn.lemmas():
                     antonyms = lemma.antonyms()
                     for a in antonyms:
-                        val = self.evaluator.value_evaluation(a.name())
-                        candidates[w].append((self.generator_utils.right_form_adjective(a.name(), properties), val))
+                        val = self.evaluator.value_evaluation(a.name().lower())
+                        candidates[w].append((self.generator_utils.right_form_adjective(a.name().lower(), properties), val))
 
         return candidates
 
