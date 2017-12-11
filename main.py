@@ -118,7 +118,7 @@ def regenerate_tweet(tweet_sentence, generated_sentence):
 def external_evaluation(top_candidates):
     use_quota = False  # change to True only when all other blocks of this software is done
     if not use_quota:
-        return top_candidates[-1]
+        return top_candidates[0]
     print("\t-Starting external evaluation for {} candidate Tweets".format(len(top_candidates)))
     lcleval = Evaluator()
     scored_top = [(t, lcleval.external_evaluation(t)) for (t, s) in top_candidates]
@@ -155,8 +155,8 @@ def internal_evaluation(generated, original_tweet):
 def format_output(original_tweet, generated_tweet):
     tb1 = TextBlob(original_tweet).sentences
     tb2 = TextBlob(generated_tweet).sentences
-
-    return "".join([regenerate_tweet(str(os), str(gs)) for (os, gs)in zip(tb1, tb2)])
+    joined = "".join([regenerate_tweet(str(os), str(gs)) for (os, gs)in zip(tb1, tb2)])
+    return joined.replace("_", " ")
 
 
 def main():
