@@ -112,6 +112,9 @@ def regenerate_tweet(tweet_sentence, generated_sentence):
 
     return new_sentence
 
+def update_progress(amtDone):
+    print("\rProgress: [{0:50s}] {1:.1f}%".format('#' * int(amtDone * 50), amtDone * 100), end="")
+
 def external_evaluation(top_candidates):
     use_quota = False  # change to True only when all other blocks of this software is done
     if not use_quota:
@@ -126,22 +129,23 @@ def internal_evaluation(generated, original_tweet):
     print("\t-Starting internal evaluation")
     lcleval = Evaluator()
     # Evaluate original tweet
-    org_novelty = lcleval.novelty_evaluation(original_tweet)
     org_res = lcleval.value_evaluation_for_words(original_tweet)
-    org_eval = (-org_res) + org_novelty
 
     # Split generated tweets to a list
     tweets = generated.split('\n')[:-1]  # remove the last \n
 
     # Collect list of generated tweets that score higher than original
     rtweets = []
+    i = 0
     for atweet in tweets:
         res = lcleval.value_evaluation_for_words(atweet)
         novelty = lcleval.novelty_evaluation(atweet)
         score = (-res) + novelty  # The lower the score, the better
-        if score < org_eval:
+        if res > org_res:
             rtweets.append((atweet, score))
-    print("\t-Evaluation done")
+        i += 1
+        update_progress(round(i / len(tweets), 1))
+    print("\n\t-Evaluation done")
     # Sort collected tweets in order based on their score
     rtweets = sorted(rtweets, key=lambda x: x[1], reverse=False)
     # Select sample of them
