@@ -20,7 +20,7 @@ class Generator:
             for candidate in verbs_c[v]:
                 temp_tokens = list(target["tokens"])
                 for (i, t) in enumerate(temp_tokens):
-                    if t == v:
+                    if t in v:  # hot-fix to deal with e.g s and 's (here's)
                         temp_tokens[i] = candidate[0]  # tuple (word, score)
                         generations.append(temp_tokens)
 
