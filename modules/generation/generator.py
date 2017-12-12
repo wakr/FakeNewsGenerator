@@ -17,14 +17,18 @@ class Generator:
         if current == max_recursion:
             return generations
         for v in verbs_c.keys():
+            if not v in target["tokens"]:  # original already reassigned
+                continue
             for candidate in verbs_c[v]:
                 temp_tokens = list(target["tokens"])
                 for (i, t) in enumerate(temp_tokens):
-                    if t in v:  # hot-fix to deal with e.g s and 's (here's)
+                    if t == v:  # hot-fix to deal with e.g s and 's (here's)
                         temp_tokens[i] = candidate[0]  # tuple (word, score)
                         generations.append(temp_tokens)
 
         for a in adjectives_c.keys():
+            if not a in target["tokens"]:  # original already reassigned
+                continue
             for candidate in adjectives_c[a]:
                 temp_tokens = list(target["tokens"])
                 for (i, t) in enumerate(temp_tokens):
@@ -33,6 +37,8 @@ class Generator:
                         generations.append(temp_tokens)
 
         for n in nouns_c.keys():
+            if not n in target["tokens"]:  # original already reassigned
+                continue
             for candidate in nouns_c[n]:
                 temp_tokens = list(target["tokens"])
                 for (i, t) in enumerate(temp_tokens):

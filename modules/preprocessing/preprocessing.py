@@ -13,7 +13,7 @@ class Preprocessor:
         res = []
         for s in sentences:
             tags = s.tags
-            get_part = lambda a, target, execptarget: [w.lower() for (w, p) in a if target in p and not execptarget in p]
+            get_part = lambda a, target, execptarget: [re.search(r'[^\W\d]+', w.lower()).group(0) for (w, p) in a if target in p and not execptarget in p]
             targets = s.noun_phrases
             tokens = re.findall(r'[^\W\d]+', s.raw.lower())
             nouns = get_part(tags, "NN", "NNP") # Exclude proper nouns
