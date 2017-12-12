@@ -34,7 +34,8 @@ class Evaluator:
         :rtype: object
         """
         score = self.model.score([text])
-        return score[0]
+        repetitiveness = max(TextBlob(text).word_counts.values())
+        return score[0] * repetitiveness
 
     def external_evaluation(self, text):
         """
