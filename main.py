@@ -156,7 +156,7 @@ def internal_evaluation(generated, original_tweet):
 def format_output(original_tweet, generated_tweet):
     tb1 = TextBlob(original_tweet).sentences
     tb2 = TextBlob(generated_tweet).sentences
-    joined = " ".join([regenerate_tweet(str(os), str(gs)) for (os, gs)in zip(tb1, tb2)])
+    joined = " ".join([regenerate_tweet(str(os).capitalize(), str(gs).capitalize()) for (os, gs)in zip(tb1, tb2)])
     return joined.replace("_", " ")
 
 
