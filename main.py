@@ -129,7 +129,7 @@ def internal_evaluation(generated, original_tweet):
     print("\t-Starting internal evaluation")
     lcleval = Evaluator()
     # Evaluate original tweet
-    org_res = lcleval.value_evaluation_for_words(original_tweet)
+    org_res = lcleval.value_evaluation_for_words(original_tweet.lower())
 
     # Split generated tweets to a list
     tweets = generated.split('\n')[:-1]  # remove the last \n
