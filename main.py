@@ -1,7 +1,6 @@
 import os
 import random
 import re
-import sys
 
 from itertools import product
 from textblob import TextBlob
@@ -75,41 +74,39 @@ def regenerate_tweet(tweet_sentence, generated_sentence):
             end_punct = word[-1]
             word = word[:-1]
         else:
-            end_punct = None
+            end_punct = ''
         # Similarly handle words that begin with certain punctuation
         if re.search(r'^[\"\']', word) is not None:
             start_punct = word[0]
             word = word[1:]
         else:
-            start_punct = None
+            start_punct = ''
 
         # If original word begins with @ then use it. Position remains same as generator
         # has only removed @
-        if re.search(r'^[@]+', word):
+        if re.search(r'^[@]+', word) or re.search(r'[\"]+', word):
             result.append(word)
             continue
 
         # If original word contains certain punctution use original instead
         # and increase adder to use one word beyond on the generated text. This
         # handles e.g. "'s" "'d" cases
-        if re.search(r"[-\'\"]+", word) is not None:
+        if re.search(r"[-\']+", word) is not None:
             adder += 1
-            result.append(word)
+            result.append(start_punct + word + end_punct)
             continue
 
         # Check if original word needs to be replaced with generated word
         if word.lower() != top_generated_lst[idx + adder]:
-            use_word = top_generated_lst[idx + adder]
+            if top_generated_lst[idx + adder].endswith('.'):
+                use_word = top_generated_lst[idx + adder][:-1]
+            else:
+                use_word = top_generated_lst[idx + adder]
         else:
             # If not use the original word
             use_word = word
 
-        # Add earlier removed punctuation, if any
-        if start_punct:
-            use_word = start_punct + use_word
-        if end_punct:
-            use_word += end_punct
-        result.append(use_word)
+        result.append(start_punct + use_word + end_punct)
 
     new_sentence = ' '.join(result)
 
@@ -155,7 +152,7 @@ def internal_evaluation(generated, original_tweet):
 def format_output(original_tweet, generated_tweet):
     tb1 = TextBlob(original_tweet).sentences
     tb2 = TextBlob(generated_tweet).sentences
-    joined = "".join([regenerate_tweet(str(os), str(gs)) for (os, gs)in zip(tb1, tb2)])
+    joined = " ".join([regenerate_tweet(str(os), str(gs)) for (os, gs)in zip(tb1, tb2)])
     return joined.replace("_", " ")
 
 
