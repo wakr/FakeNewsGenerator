@@ -1,7 +1,6 @@
 import os
 import random
 import re
-import sys
 
 from itertools import product
 from textblob import TextBlob
@@ -75,50 +74,51 @@ def regenerate_tweet(tweet_sentence, generated_sentence):
             end_punct = word[-1]
             word = word[:-1]
         else:
-            end_punct = None
+            end_punct = ''
         # Similarly handle words that begin with certain punctuation
         if re.search(r'^[\"\']', word) is not None:
             start_punct = word[0]
             word = word[1:]
         else:
-            start_punct = None
+            start_punct = ''
 
         # If original word begins with @ then use it. Position remains same as generator
         # has only removed @
-        if re.search(r'^[@]+', word):
+        if re.search(r'^[@]+', word) or re.search(r'[\"]+', word):
             result.append(word)
             continue
 
         # If original word contains certain punctution use original instead
         # and increase adder to use one word beyond on the generated text. This
         # handles e.g. "'s" "'d" cases
-        if re.search(r"[-\'\"]+", word) is not None:
+        if re.search(r"[-\']+", word) is not None:
             adder += 1
-            result.append(word)
+            result.append(start_punct + word + end_punct)
             continue
 
         # Check if original word needs to be replaced with generated word
         if word.lower() != top_generated_lst[idx + adder]:
-            use_word = top_generated_lst[idx + adder]
+            if top_generated_lst[idx + adder].endswith('.'):
+                use_word = top_generated_lst[idx + adder][:-1]
+            else:
+                use_word = top_generated_lst[idx + adder]
         else:
             # If not use the original word
             use_word = word
 
-        # Add earlier removed punctuation, if any
-        if start_punct:
-            use_word = start_punct + use_word
-        if end_punct:
-            use_word += end_punct
-        result.append(use_word)
+        result.append(start_punct + use_word + end_punct)
 
     new_sentence = ' '.join(result)
 
     return new_sentence
 
+def update_progress(amtDone):
+    print("\rProgress: [{0:50s}] {1:.1f}%".format('#' * int(amtDone * 50), amtDone * 100), end="")
+
 def external_evaluation(top_candidates):
     use_quota = False  # change to True only when all other blocks of this software is done
     if not use_quota:
-        return top_candidates[-1]
+        return top_candidates[0]
     print("\t-Starting external evaluation for {} candidate Tweets".format(len(top_candidates)))
     lcleval = Evaluator()
     scored_top = [(t, lcleval.external_evaluation(t)) for (t, s) in top_candidates]
@@ -129,22 +129,23 @@ def internal_evaluation(generated, original_tweet):
     print("\t-Starting internal evaluation")
     lcleval = Evaluator()
     # Evaluate original tweet
-    org_novelty = lcleval.novelty_evaluation(original_tweet)
-    org_res = lcleval.value_evaluation_for_words(original_tweet)
-    org_eval = (-org_res) + org_novelty
+    org_res = lcleval.value_evaluation_for_words(original_tweet.lower())
 
     # Split generated tweets to a list
     tweets = generated.split('\n')[:-1]  # remove the last \n
 
     # Collect list of generated tweets that score higher than original
     rtweets = []
+    i = 0
     for atweet in tweets:
         res = lcleval.value_evaluation_for_words(atweet)
         novelty = lcleval.novelty_evaluation(atweet)
         score = (-res) + novelty  # The lower the score, the better
-        if score < org_eval:
+        if res > org_res:
             rtweets.append((atweet, score))
-    print("\t-Evaluation done")
+        i += 1
+        update_progress(round(i / len(tweets), 1))
+    print("\n\t-Evaluation done")
     # Sort collected tweets in order based on their score
     rtweets = sorted(rtweets, key=lambda x: x[1], reverse=False)
     # Select sample of them
@@ -155,8 +156,8 @@ def internal_evaluation(generated, original_tweet):
 def format_output(original_tweet, generated_tweet):
     tb1 = TextBlob(original_tweet).sentences
     tb2 = TextBlob(generated_tweet).sentences
-
-    return "".join([regenerate_tweet(str(os), str(gs)) for (os, gs)in zip(tb1, tb2)])
+    joined = " ".join([regenerate_tweet(str(os), str(gs)) for (os, gs)in zip(tb1, tb2)])
+    return joined.replace("_", " ")
 
 
 def main():
