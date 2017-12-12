@@ -10,35 +10,49 @@ import os
 
 
 class Evaluator:
-    def __init__(self, evaluate_novelty = True, evaluate_value = True):
-        self.evaluate_novelty = evaluate_novelty
-        self.evaluate_value = evaluate_value
+    def __init__(self):
+        """
+        Initialization of Evaluator
+        """
         self.nb_blobber = Blobber(analyzer=NaiveBayesAnalyzer())
         dir = os.path.dirname(__file__)
         self.model = Word2Vec.load(os.path.join(dir, "../data/Model")) # In our novelty evaluation we are using Word2Vec model trained with reuters news titles
         self.read_negative_words()
         self.word_negativities = {}
 
-    # We are using negative words list in evaluating value of word
+
     def read_negative_words(self):
+        """ We are using negative words list in evaluating value of word. This function reads the negative words list """
         dir = os.path.dirname(__file__)
         filename = os.path.join(dir, '../data/negative_word_list.txt')
         text = open(filename).read()
         self.negative_words = set(text.split("\n"))
 
-    # Novelty evaluation is log propability of text occurring according to our Word2Vec model. Lower score, better novelty.
+
     def novelty_evaluation(self, text):
+        """ Novelty evaluation is log propability of text occurring according to our Word2Vec model. Lower score, better novelty.
+        :rtype: object
+        """
         score = self.model.score([text])
         return score[0]
 
-    # External evaluation is used for evaluating the final tweet. It's novelty and negativity value combined, first scaling novelty.
     def external_evaluation(self, text):
+        """
+        External evaluation is used for evaluating the final tweet. It's novelty and negativity value combined, first scaling novelty.
+        Higher, better.
+        :param text:
+        :return:
+        """
         nov = -1*(self.novelty_evaluation(text))/1000
         val = self.get_final_evaluation(text)['neg']
         return nov + val
 
-    # Value evaluation is weighted sum which is not between 0, 1. It evaluates negativity.
     def value_evaluation(self, sentence):
+        """
+        Value evaluation is weighted sum which is not between 0, 1. It evaluates negativity. Higher, better.
+        :param sentence: preprocessed sentence or single word
+        :return: negativity
+        """
         sum = 0
         if sentence in self.negative_words:
             sum += 0.5
@@ -48,8 +62,12 @@ class Evaluator:
         polarity_nb = blob_naive_bayes.sentiment.p_neg
         return sum + polarity_nb + polarity_tb
 
-    # This function returns sum of negativities of list of words.
     def value_evaluation_for_words(self, sentence):
+        """
+        Value (negativity) evaluation for whole sentence
+        :param sentence:  string
+        :return: sum of negativities of words in sentence
+        """
         sum = 0
         blob = self.nb_blobber(sentence)
         for word in blob.words:
@@ -66,9 +84,10 @@ class Evaluator:
 
 
 
-    # This function evaluates negativity of sentence using WordNet
+
     def get_final_evaluation(self, new_tweet):
         """
+        This function evaluates negativity of sentence using WordNet.
         The final evaluation of tweet. Note 25000 limit per month :(
         :param new_tweet: phenotype
         :return dictionary with pos/neg scores
