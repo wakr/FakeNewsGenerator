@@ -1,3 +1,4 @@
+''' Main program for Computational Creativity FakeNewGenerator'''
 import os
 import random
 import re
@@ -11,6 +12,7 @@ from modules.evaluator import Evaluator
 from modules.tweet_grabber import collect_tweets
 
 def grab_tweet():
+    ''' Retrieve tweet from Twitter or file '''
     tweet_file = "data/stored_tweets.txt"
 
     # Check if there is file with tweets available
@@ -27,13 +29,15 @@ def grab_tweet():
     # Remove empty lines, if any
     tweets = [tweet.strip() for tweet in tweets if len(tweet.strip()) > 1]
     # Select one tweet for processing
-    selected_tweet = random.choice(tweets)
+    selected_tweet = tweets[8] #random.choice(tweets)
     # Remove new line, if present
     selected_tweet = selected_tweet.replace('\n', '')
     # Remove possible hyperlink
     return re.sub(r'http\:\/\/cnn.it\S+', '', selected_tweet)
 
 def generate_text(tweet):
+    ''' Generate fake news tweet '''
+
     pos_targets = Preprocessor(tweet).process()
     generation = Generator(pos_targets).generate()
     print("\t-Starting to form combinations...")
@@ -43,34 +47,39 @@ def generate_text(tweet):
 
     for sent_cands in generation_combinations:
         res += ". ".join(sent_cands) + "\n"
-    # Perform internal evaluation although it does not presently affect anything
-    # save that it takes a fixed size of samples from generated
+
+    # Perform evaluation of generated result. Internal refers to local and
+    # external refers to external service, which uses web servicce.
     sampled = internal_evaluation(res, tweet)
     final_res = external_evaluation(sampled)
+
     return final_res
 
 def regenerate_tweet(tweet_sentence, generated_sentence):
     '''Re-generate tweet based on generated results'''
+
     result = []
     tweet_sentence_lst = tweet_sentence.split()
     top_generated_lst = generated_sentence.split()
     # Adder is used to reposition what word is used in generated tweet
     adder = 0
-    # Reconstruct twet word by word
+
+    # Reconstruct tweet word by word
     for idx, word in enumerate(tweet_sentence_lst):
         # If original contains numbers, e.g. "32", or it contains only some punctuations,
         # e.g. '--', then the generator has eliminated these words and we use original
         # word but have to reduce adder by one to compensate what to use next word
         # in generated sentence
         if (re.search(r'[0-9]+', word) is not None) or \
-            (re.search(r"[-\'\"]+", word) is not None and re.search(r'[A-Za-z]',word) is None):
+            (re.match(r'[\W]+', word) is not None) or \
+            (re.search(r"[-\'\"]+", word) is not None and re.search(r'[A-Za-z]+',word) is None):
             adder -= 1
             result.append(word)
             continue
 
         # If original word contains certain punctuation at the end, remove it and store
         # for later re-attachment
-        if re.search(r'[.,!\?\"]$', word) is not None:
+        if re.search(r'[.,!\?\"]$', word) is not None and re.search(r'[A-Za-z]+', word) is not None:
             end_punct = word[-1]
             word = word[:-1]
         else:
@@ -82,8 +91,8 @@ def regenerate_tweet(tweet_sentence, generated_sentence):
         else:
             start_punct = ''
 
-        # If original word begins with @ then use it. Position remains same as generator
-        # has only removed @
+        # If original word begins with @ then use it or if quotation mark is
+        # attached to it. Position remains same as generator has only removed @
         if re.search(r'^[@]+', word) or re.search(r'[\"]+', word):
             result.append(word)
             continue
@@ -91,7 +100,7 @@ def regenerate_tweet(tweet_sentence, generated_sentence):
         # If original word contains certain punctution use original instead
         # and increase adder to use one word beyond on the generated text. This
         # handles e.g. "'s" "'d" cases
-        if re.search(r"[-\']+", word) is not None:
+        if re.search(r"[-\']+", word) is not None or re.search(r'[\W]', word) is not None:
             adder += 1
             result.append(start_punct + word + end_punct)
             continue
@@ -113,19 +122,26 @@ def regenerate_tweet(tweet_sentence, generated_sentence):
     return new_sentence
 
 def update_progress(amtDone):
+    ''' Print evaluation progress '''
     print("\rProgress: [{0:50s}] {1:.1f}%".format('#' * int(amtDone * 50), amtDone * 100), end="")
 
 def external_evaluation(top_candidates):
+    ''' Use external service to perform evaluation '''
     use_quota = False  # change to True only when all other blocks of this software is done
     if not use_quota:
         return top_candidates[0]
+
     print("\t-Starting external evaluation for {} candidate Tweets".format(len(top_candidates)))
     lcleval = Evaluator()
     scored_top = [(t, lcleval.external_evaluation(t)) for (t, s) in top_candidates]
     scored_top = sorted(scored_top, key=lambda x: x[1], reverse=True)
-    return scored_top[0]  # the best
+
+    # Select only single top ranked result
+    return scored_top[0]
 
 def internal_evaluation(generated, original_tweet):
+    ''' Use internal (local) evaluation '''
+
     print("\t-Starting internal evaluation")
     lcleval = Evaluator()
     # Evaluate original tweet
@@ -134,7 +150,7 @@ def internal_evaluation(generated, original_tweet):
     # Split generated tweets to a list
     tweets = generated.split('\n')[:-1]  # remove the last \n
 
-    # Collect list of generated tweets that score higher than original
+    # Collect list of generated tweets that have higher score than original tweet
     rtweets = []
     i = 0
     for atweet in tweets:
@@ -145,28 +161,35 @@ def internal_evaluation(generated, original_tweet):
             rtweets.append((atweet, score))
         i += 1
         update_progress(round(i / len(tweets), 1))
+
     print("\n\t-Evaluation done")
     # Sort collected tweets in order based on their score
     rtweets = sorted(rtweets, key=lambda x: x[1], reverse=False)
-    # Select sample of them
-    sampled = rtweets[:10]  # take max top-10
+    # Select top 10 of them
+    sampled = rtweets[:10]
+
     return sampled
 
 
 def format_output(original_tweet, generated_tweet):
+    ''' Format generated tweet to resemble original tweet in appearance '''
+
     tb1 = TextBlob(original_tweet).sentences
     tb2 = TextBlob(generated_tweet).sentences
-    joined = " ".join([regenerate_tweet(str(os).capitalize(), str(gs).capitalize()) for (os, gs)in zip(tb1, tb2)])
+    joined = " ".join([regenerate_tweet(str(os), str(gs)) for (os, gs)in zip(tb1, tb2)])
+
     return joined.replace("_", " ")
 
 
 def main():
+    ''' Main runner for the program '''
+
     tweet = grab_tweet()
-    print(tweet)
+    print('Original tweet: ' + tweet)
     output = generate_text(tweet)
     # Display generated texts
     formatted_output = format_output(tweet, output[0])
-    print(formatted_output)
+    print('Generated tweet: ' + formatted_output)
 
 
 if __name__ == '__main__':
