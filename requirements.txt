@@ -1,5 +1,4 @@
 selenium==3.7.0
 requests>=2.9.1
 xmltodict==0.11.0
-gensim
-pyemd
+textblob==0.14.0
