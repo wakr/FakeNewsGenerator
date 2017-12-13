@@ -86,6 +86,12 @@ class Generator:
         return True
 
     def negatize_verbs(self, sent_target, max_synset_len=3):
+        """
+        Looks for negative verb candidates
+        :param sent_target: target verbs
+        :param max_synset_len: maximum allowed wideness
+        :return: verb candidates
+        """
         candidates = {}
         flatten = lambda l: [item for sublist in l for item in sublist]
         for w in sent_target["verbs"]:
@@ -108,6 +114,12 @@ class Generator:
         return candidates
 
     def negatize_nouns(self, sent_target, max_synset_len=3):
+        """
+        Looks for negative noun candidates
+        :param sent_target: target nouns
+        :param max_synset_len: maximum allowed wideness
+        :return: noun candidates
+        """
         candidates = {}
         flatten = lambda l: [item for sublist in l for item in sublist]
         for w in sent_target["nouns"]:
@@ -127,6 +139,12 @@ class Generator:
         return candidates
 
     def negatize_adjectives(self, sent_target, max_synset_len=3):
+        """
+        Looks for negative adjective candidates
+        :param sent_target: target adjectives
+        :param max_synset_len: maximum allowed wideness
+        :return: adjective candidates
+        """
         candidates = {}
         for w in sent_target["adjectives"]:
             candidates[w] = [(w, self.evaluator.value_evaluation(w))]
@@ -142,6 +160,9 @@ class Generator:
         return candidates
 
     def _flatten(self, A, V):
+        """
+        Flattens the multidimensional array
+        """
         if not A:
             return V
         for c in A:
@@ -153,6 +174,9 @@ class Generator:
         return V
 
     def fix_missing(self, set_tweets, original_sents):
+        """
+        Prevents creating empty candidates
+        """
         res = []
         full_original_sents = [" ".join(s["tokens"]) for s in original_sents]
         for s1, s2 in zip(set_tweets, full_original_sents):
@@ -164,6 +188,7 @@ class Generator:
 
     def generate(self):
         """
+        Utilizes recursive helper function. Forms the final genotypes which are used to create combinations
         :return: candidates per sentence [[C1], [C2]...,[CN]]
         """
         max_recursion = 3
