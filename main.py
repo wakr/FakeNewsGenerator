@@ -129,7 +129,7 @@ def update_progress(amtDone):
 
 def external_evaluation(top_candidates, original_tweet):
     ''' Use external service to perform evaluation '''
-    use_quota = False  # change to True only when all other blocks of this software is done
+    use_quota = True
     if not use_quota:
         return top_candidates[0]
 
