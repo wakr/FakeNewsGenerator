@@ -1,5 +1,5 @@
 # FakeNewsGenerator
-Project for Computational Creativity 2017
+Project for Computational Creativity 2017. Kristian Wahlroos, Pihla Toivanen, Esa Harju
 
 ## Install (WIP)
 
