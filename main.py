@@ -29,7 +29,7 @@ def grab_tweet():
     # Remove empty lines, if any
     tweets = [tweet.strip() for tweet in tweets if len(tweet.strip()) > 1]
     # Select one tweet for processing
-    selected_tweet = tweets[8] #random.choice(tweets)
+    selected_tweet = random.choice(tweets)
     # Remove new line, if present
     selected_tweet = selected_tweet.replace('\n', '')
     # Remove possible hyperlink
@@ -71,7 +71,7 @@ def regenerate_tweet(tweet_sentence, generated_sentence):
         # word but have to reduce adder by one to compensate what to use next word
         # in generated sentence
         if (re.search(r'[0-9]+', word) is not None) or \
-            (re.match(r'[\W]+', word) is not None) or \
+            (re.match(r'[\W]+', word) is not None and re.search(r'^[@\"]+', word) is None) or \
             (re.search(r"[-\'\"]+", word) is not None and re.search(r'[A-Za-z]+',word) is None):
             adder -= 1
             result.append(word)
