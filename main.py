@@ -51,9 +51,11 @@ def generate_text(tweet):
     # Perform evaluation of generated result. Internal refers to local and
     # external refers to external service, which uses web servicce.
     sampled = internal_evaluation(res, tweet)
-    final_res = external_evaluation(sampled)
+    if not sampled:
+        return tweet, False
+    final_res = external_evaluation(sampled, tweet)
 
-    return final_res
+    return final_res, True
 
 def regenerate_tweet(tweet_sentence, generated_sentence):
     '''Re-generate tweet based on generated results'''
@@ -125,7 +127,7 @@ def update_progress(amtDone):
     ''' Print evaluation progress '''
     print("\rProgress: [{0:50s}] {1:.1f}%".format('#' * int(amtDone * 50), amtDone * 100), end="")
 
-def external_evaluation(top_candidates):
+def external_evaluation(top_candidates, original_tweet):
     ''' Use external service to perform evaluation '''
     use_quota = False  # change to True only when all other blocks of this software is done
     if not use_quota:
@@ -186,11 +188,13 @@ def main():
 
     tweet = grab_tweet()
     print('Original tweet: ' + tweet)
-    output = generate_text(tweet)
-    # Display generated texts
-    formatted_output = format_output(tweet, output[0])
-    print('Generated tweet: ' + formatted_output)
-
+    output, found_candidates = generate_text(tweet)
+    if found_candidates:
+        # Display generated texts
+        formatted_output = format_output(tweet, output[0])
+        print('Generated tweet: ' + formatted_output)
+    else:
+        print("!!!Couldn't find any candidates to replace original tweet.!!!")
 
 if __name__ == '__main__':
     main()
