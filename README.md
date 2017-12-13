@@ -12,3 +12,10 @@ Presently this program uses Chrome as a browser, so you will need appropriate [d
 
 After requirements installation, download Word2Vec model from https://drive.google.com/file/d/1jXxEfznmBGphznZHY9W6AT39yye8hAC6/view?usp=sharing , and place it to data -folder. 
 
+## Usage 
+
+
+		python main.py
+
+main.py fetches tweets from CNN and runs the generator. If there is already tweets saved to txt-file, program takes tweets from it. 
+
