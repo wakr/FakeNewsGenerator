@@ -17,5 +17,5 @@ After requirements installation, download Word2Vec model from https://drive.goog
 
 		python main.py
 
-main.py fetches tweets from CNN and runs the generator. If there is already tweets saved to txt-file, program takes tweets from it. 
+main.py fetches tweets from CNN and runs the generator. If there is already tweets saved to txt-file, program takes tweets from it. Program should print all information needed to successful generation.
 
