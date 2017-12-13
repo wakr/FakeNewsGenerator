@@ -1,10 +1,8 @@
 from modules.evaluator import Evaluator
-from modules.generation.transformer import explore_space
 from textblob import Word
 from textblob.wordnet import ADJ, VERB, NOUN
 from modules.generation.generator_utils import GeneratorUtils
 
-import random
 
 class Generator:
     def __init__(self, pos_sentences):
@@ -13,6 +11,16 @@ class Generator:
         self.generator_utils = GeneratorUtils()
 
     def replace_candidates_to_original(self, target, verbs_c, adjectives_c, nouns_c, max_recursion, current=0):
+        """
+        Recursively replaces POS-candidates to original tweet. Takes only one sentence at a time
+        :param target: the tokens of original tweet
+        :param verbs_c: dict of verb candidates
+        :param adjectives_c: dict of adjective candidates
+        :param nouns_c: dict of noun candidates
+        :param max_recursion: maximum recursion depth to early cut off
+        :param current: current recursion depth
+        :return: lists of candidate tweets
+        """
         generations = []
         if current == max_recursion:
             return generations
@@ -52,6 +60,12 @@ class Generator:
         return res
 
     def get_n_highest(self, candidate_scores, n=1):
+        """
+        Gets n-highest candidates for POS-class
+        :param candidate_scores: scores per candidates
+        :param n: how many to take from sorted list
+        :return: dict of best candidates
+        """
         res = {}
         for k in candidate_scores.keys():
             cands = candidate_scores[k]
@@ -60,6 +74,11 @@ class Generator:
         return res
 
     def replacement_allowed(self, word):
+        """
+        Prevent replacing specific words
+        :param word: candidate
+        :return: is replacement allowed
+        """
         not_list = ['was', 'were', 'is', 'are', 'have', 'has', 'had']
         for not_word in not_list:
             if word == not_word:
@@ -133,6 +152,16 @@ class Generator:
                 self._flatten(c, V)
         return V
 
+    def fix_missing(self, set_tweets, original_sents):
+        res = []
+        full_original_sents = [" ".join(s["tokens"]) for s in original_sents]
+        for s1, s2 in zip(set_tweets, full_original_sents):
+            if not s1:
+                res.append([s2]) # add the original as candidate if no candidates are found
+            else:
+                res.append(s1)
+        return res
+
     def generate(self):
         """
         :return: candidates per sentence [[C1], [C2]...,[CN]]
@@ -150,4 +179,4 @@ class Generator:
         tweets_per_sent = [self._flatten(res[i], []) for (i, s) in enumerate(self.pos_sentences)]
         set_tweets_per_sent = [list(set(sent)) for sent in tweets_per_sent]  # throw away duplicates
         print("\t-Generation done. Found {} candidates for {} sentences".format(sum([len(s) for s in set_tweets_per_sent]), len(self.pos_sentences)))
-        return set_tweets_per_sent
+        return self.fix_missing(set_tweets_per_sent, self.pos_sentences)
